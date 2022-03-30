@@ -52,6 +52,10 @@ readonly _plugin_subcmds=(
 		set-zone-desc zone-append changed-zone-list"
 	[nvidia]="id-ctrl"
 	[ymtc]="smart-log-add"
+	[hoon]="id-ctrl id-ns zone-mgmt-recv \
+		zone-mgmt-send report-zones close-zone \
+		finish-zone open-zone reset-zone offline-zone \
+		set-zone-desc zone-append changed-zone-list"
 )
 
 # Associative array mapping plugins to coresponding option completions
@@ -73,6 +77,7 @@ readonly _plugin_funcs=(
 	[zns]="plugin_zns_opts"
 	[nvidia]="plugin_nvidia_opts"
 	[ymtc]="plugin_ymtc_opts"
+	[hoon]="plugin_hoon_opts"
 )
 
 # Top level commands
@@ -1269,6 +1274,98 @@ plugin_zns_opts () {
 
 	return 0
 }
+
+
+
+plugin_hoon_opts () {
+    local opts=""
+	local compargs=""
+
+	local nonopt_args=0
+	for (( i=0; i < ${#words[@]}-1; i++ )); do
+		if [[ ${words[i]} != -* ]]; then
+			let nonopt_args+=1
+		fi
+	done
+
+	if [ $nonopt_args -eq 3 ]; then
+		opts="/dev/nvme* "
+	fi
+
+	opts+=" "
+
+	case "$1" in
+		"id-ctrl")
+		opts+=" --raw-binary -b --human-readable -H \
+			--vendor-specific -v --output-format= -o"
+			;;
+		"id-ns")
+		opts+=" --namespace-id= -n --vendor-specific -v \
+			--output-format= -o --human-readable -H"
+			;;
+		"zone-mgmt-recv")
+		opts+=" --output-format= -o --namespace-id= -n \
+			--start-lba= -s --zra= -z --zrasf= -S --partial -p \
+			--data-len= -l"
+			;;
+		"zone-mgmt-send")
+		opts+=" --namespace-id= -n --start-lba= -s --zsaso -o \
+			--select-all -a --zsa= -z --data-len= -l \
+			--data= -d --timeout= -t"
+			;;
+		"report-zones")
+		opts+=" --namespace-id= -n --start-lba= -s \
+			--descs= -d --state= -S --output-format= -o \
+			--human-readable -H --extended -e --partial -p"
+			;;
+		"close-zone")
+		opts+=" --namespace-id= -n --start-lba= -s \
+			--select-all -a --timeout= -t"
+			;;
+		"finish-zone")
+		opts+=" --namespace-id= -n --start-lba= -s \
+			--select-all -a --timeout= -t"
+			;;
+		"open-zone")
+		opts+=" --namespace-id= -n --start-lba= -s \
+			--select-all -a --timeout= -t --zrwa -r"
+			;;
+		"reset-zone")
+		opts+=" --namespace-id= -n --start-lba= -s \
+			--select-all -a --timeout= -t"
+			;;
+		"offline-zone")
+		opts+=" --namespace-id= -n --start-lba= -s \
+			--select-all -a --timeout= -t"
+			;;
+		"set-zone-desc")
+		opts+=" --namespace-id= -n --start-lba= -s \
+			--data= -d --timeout= -t  --zrwa -r"
+			;;
+		"flush-zone")
+		opts+=" --namespace-id= -n --last-lba= -l --timeout= -t"
+			;;
+		"zone-append")
+		opts+=" --namespace-id= -n --zslba= -s --data-size= -z \
+			--metadata-size= -y --data= -d --metadata= -M \
+			--limited-retry -l --force-unit-access -f --ref-tag= -r
+			--app-tag-mask= -m --app-tag= -a --prinfo= -p \
+			--piremap -P --latency -t"
+			;;
+		"changed-zone-list")
+		opts+=" --namespace-id= -n --output-format= -o --rae -r"
+			;;
+		"help")
+		opts+=$NO_OPTS
+			;;
+	esac
+
+	COMPREPLY+=( $( compgen $compargs -W "$opts" -- $cur ) )
+
+	return 0
+}
+
+
 
 plugin_nvidia_opts () {
     local opts=""
