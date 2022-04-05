@@ -5038,14 +5038,14 @@ void nvme_show_zns_report_zones(void *report, __u32 descs,
 		desc = (struct nvme_zns_desc *)
 			(report + sizeof(*r) + i * (sizeof(*desc) + ext_size));
 		if(verbose) {
-			printf("SLBA: %#-10"PRIx64" WP: %#-10"PRIx64" Cap: %#-10"PRIx64" State: %-12s Type: %-14s\n",
-				(uint64_t)le64_to_cpu(desc->zslba), (uint64_t)le64_to_cpu(desc->wp),
+			printf("[zone%d] SLBA: %#-10"PRIx64" WP: %#-10"PRIx64" Cap: %#-10"PRIx64" State: %-12s Type: %-14s\n",
+				i, (uint64_t)le64_to_cpu(desc->zslba), (uint64_t)le64_to_cpu(desc->wp),
 				(uint64_t)le64_to_cpu(desc->zcap), zone_state_to_string(desc->zs >> 4),
 				zone_type_to_string(desc->zt));
 			nvme_show_zns_report_zone_attributes(desc->za, desc->zai);
 		}
 		else {
-			printf("SLBA: %#-10"PRIx64" WP: %#-10"PRIx64" Cap: %#-10"PRIx64" State: %#-4x Type: %#-4x Attrs: %#-4x AttrsInfo: %#-4x\n",
+			printf("[zone%d] SLBA: %#-10"PRIx64" WP: %#-10"PRIx64" Cap: %#-10"PRIx64" State: %#-4x Type: %#-4x Attrs: %#-4x AttrsInfo: %#-4x\n",
 				(uint64_t)le64_to_cpu(desc->zslba), (uint64_t)le64_to_cpu(desc->wp),
 				(uint64_t)le64_to_cpu(desc->zcap), desc->zs, desc->zt,
 				desc->za, desc->zai);

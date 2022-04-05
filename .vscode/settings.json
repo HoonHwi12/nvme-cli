@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "assert.h": "c",
+        "inttypes.h": "c",
+        "nvme.h": "c",
+        "plugin.h": "c",
+        "dirent.h": "c",
+        "stdbool.h": "c",
+        "stdint.h": "c",
+        "endian.h": "c"
+    }
+}
