@@ -7,6 +7,7 @@
         "dirent.h": "c",
         "stdbool.h": "c",
         "stdint.h": "c",
-        "endian.h": "c"
+        "endian.h": "c",
+        "define_cmd.h": "c"
     }
 }
