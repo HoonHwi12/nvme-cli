@@ -5048,7 +5048,7 @@ void nvme_show_zns_report_zones(void *report, __u32 descs,
 		}
 		else {
 			printf("[zone%d] SLBA: %#-10"PRIx64" WP: %#-10"PRIx64" Cap: %#-10"PRIx64" State: %#-4x Type: %#-4x Attrs: %#-4x AttrsInfo: %#-4x\n",
-				(uint64_t)le64_to_cpu(desc->zslba), (uint64_t)le64_to_cpu(desc->wp),
+				i, (uint64_t)le64_to_cpu(desc->zslba), (uint64_t)le64_to_cpu(desc->wp),
 				(uint64_t)le64_to_cpu(desc->zcap), desc->zs, desc->zt,
 				desc->za, desc->zai);
 		}

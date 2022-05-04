@@ -413,7 +413,7 @@ ret:
 
 
 
-// by HH: change flash type
+// by HH: config control
 static int h_config_control(int argc, char **argv, struct command *cmd, struct plugin *plugin)
 {
 	const char *desc = "Hoon plugin command";
@@ -440,7 +440,7 @@ static int h_config_control(int argc, char **argv, struct command *cmd, struct p
 		.cdw3			= 0,
 		.cdw10			= 0x899,
 		.cdw11			= 0x899,
-		.cdw12			= 0,
+		.cdw12			= 0x899,
 		.cdw13			= 0,
 		.cdw14			= 0,
 		.cdw15			= 0,
@@ -457,6 +457,7 @@ static int h_config_control(int argc, char **argv, struct command *cmd, struct p
 	OPT_ARGS(opts) = {
 		OPT_UINT("max_active",	'a', &cfg.cdw10,        "max number of active zone"),
 		OPT_UINT("max_open",	'o', &cfg.cdw11,        "max number of opened zone"),
+		OPT_UINT("femu_mode",	'm', &cfg.cdw12,        "define femu mode: OCSSD(0) BBSSD(1) NOSSD(2) ZNSSD(3) ZBBSSD(4)"),
 		OPT_END()
 	};
 
