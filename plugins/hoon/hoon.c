@@ -432,7 +432,7 @@ static int h_config_control(int argc, char **argv, struct command *cmd, struct p
 		.flags			= 0,
 		.prefill		= 0,
 		.rsvd			= 0,
-		.namespace_id	= 0,
+		.namespace_id	= 1,
 		.data_len		= 0,
 		.metadata_len	= 0,
 		.timeout		= 0,
@@ -524,6 +524,10 @@ static int h_config_control(int argc, char **argv, struct command *cmd, struct p
 		} else if (data && cfg.read)
 			d_raw((unsigned char *)data, cfg.data_len);
 	}
+
+    int status = system("echo>/sys/block/nvme0n1/device/rescan_controller");
+    if(status) return status;
+		
 free_metadata:
 	free(mdata);
 free_data:
