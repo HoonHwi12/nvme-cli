@@ -525,7 +525,9 @@ static int h_config_control(int argc, char **argv, struct command *cmd, struct p
 			d_raw((unsigned char *)data, cfg.data_len);
 	}
 
-    int status = system("echo>/sys/block/nvme0n1/device/rescan_controller");
+	int status = 0;
+	status += system("echo> blkzone reset /dev/nvme0n1");
+    status += system("echo> /sys/block/nvme0n1/device/rescan_controller");
     if(status) return status;
 		
 free_metadata:
