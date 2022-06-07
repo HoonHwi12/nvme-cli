@@ -96,7 +96,7 @@ static int nvme_sct_op(int fd,  __u32 opcode, __u32 cdw10, __u32 cdw11, void* da
 
 
 
-// by HH: change flash type
+//* by HH: change flash type
 static int change_flash_type(int argc, char **argv, struct command *cmd, struct plugin *plugin)
 {
 	const char *desc = "Hoon plugin command";
@@ -257,7 +257,7 @@ ret:
 }
 
 
-// by HH: print-zones
+//* by HH: print-zones
 static int print_nand(int argc, char **argv, struct command *cmd, struct plugin *plugin)
 {
 	const char *desc = "Hoon plugin command";
@@ -309,7 +309,7 @@ static int print_nand(int argc, char **argv, struct command *cmd, struct plugin 
 		.timeout	= 0,
 		.cdw2		= 0,
 		.cdw3		= 0,
-		.cdw10		= 0,
+		.cdw10		= 0x899,
 		.cdw11		= 0,
 		.cdw12		= 0,
 		.cdw13		= 0,
@@ -326,7 +326,7 @@ static int print_nand(int argc, char **argv, struct command *cmd, struct plugin 
 	};
 
 	OPT_ARGS(opts) = {
-	
+		OPT_UINT("zone_range",	'r', &cfg.cdw10,        "print_zone_range"),
 		OPT_END()
 	};
 
@@ -411,9 +411,7 @@ ret:
 }
 
 
-
-
-// by HH: config control
+//* by HH: config control
 static int h_config_control(int argc, char **argv, struct command *cmd, struct plugin *plugin)
 {
 	const char *desc = "Hoon plugin command";
@@ -529,6 +527,136 @@ static int h_config_control(int argc, char **argv, struct command *cmd, struct p
 	status += system("echo> blkzone reset /dev/nvme0n1");
     status += system("echo> /sys/block/nvme0n1/device/rescan_controller");
     if(status) return status;
+		
+free_metadata:
+	free(mdata);
+free_data:
+	nvme_free(data, huge);
+close_dfd:
+	if (strlen(cfg.input_file))
+		close(dfd);
+close_mfd:
+	if (strlen(cfg.metadata))
+		close(mfd);
+close_fd:
+	close(fd);
+ret:
+	return err;
+}
+
+
+
+
+//* by HH: set debug mode
+static int set_debug_mode(int argc, char **argv, struct command *cmd, struct plugin *plugin)
+{
+	const char *desc = "Hoon plugin command";
+	
+	int flags;
+
+	void *data = NULL, *mdata = NULL;
+	int err = 0, dfd, mfd, fd;
+	__u32 result;
+	bool huge = false;
+	const char *cmd_name = NULL;
+	struct timeval start_time, end_time;
+
+	struct admin_config cfg = {
+		.opcode			= 0x92,
+		.flags			= 0,
+		.prefill		= 0,
+		.rsvd			= 0,
+		.namespace_id	= 1,
+		.data_len		= 0,
+		.metadata_len	= 0,
+		.timeout		= 0,
+		.cdw2			= 0,
+		.cdw3			= 0,
+		.cdw10			= 0x899,
+		.cdw11			= 0x899,
+		.cdw12			= 0,
+		.cdw13			= 0,
+		.cdw14			= 0,
+		.cdw15			= 0,
+		.input_file		= "",
+		.metadata		= "",
+		.raw_binary		= 0,
+		.show_command	= 0,
+		.dry_run		= 0,
+		.read			= 0,
+		.write			= 0,
+		.latency		= 0,
+	};
+
+	OPT_ARGS(opts) = {
+		OPT_UINT("debug",	'd', &cfg.cdw10,        "set debug print"),
+		OPT_UINT("test",	't', &cfg.cdw11,        "set test print"),
+		OPT_END()
+	};
+
+	err = fd = parse_and_open(argc, argv, desc, opts);
+	if (fd < 0)
+		goto ret;
+
+	if (cfg.show_command || cfg.dry_run) {
+		printf("opcode       : %02x\n", cfg.opcode);
+		printf("flags        : %02x\n", cfg.flags);
+		printf("rsvd1        : %04x\n", cfg.rsvd);
+		printf("nsid         : %08x\n", cfg.namespace_id);
+		printf("cdw2         : %08x\n", cfg.cdw2);
+		printf("cdw3         : %08x\n", cfg.cdw3);
+		printf("data_len     : %08x\n", cfg.data_len);
+		printf("metadata_len : %08x\n", cfg.metadata_len);
+		printf("addr         : %"PRIx64"\n", (uint64_t)(uintptr_t)data);
+		printf("metadata     : %"PRIx64"\n", (uint64_t)(uintptr_t)mdata);
+		printf("cdw10        : %08x\n", cfg.cdw10);
+		printf("cdw11        : %08x\n", cfg.cdw11);
+		printf("cdw12        : %08x\n", cfg.cdw12);
+		printf("cdw13        : %08x\n", cfg.cdw13);
+		printf("cdw14        : %08x\n", cfg.cdw14);
+		printf("cdw15        : %08x\n", cfg.cdw15);
+		printf("timeout_ms   : %08x\n", cfg.timeout);
+	}
+	if (cfg.dry_run)
+		goto free_data;
+	gettimeofday(&start_time, NULL);
+	
+	err = nvme_admin_passthru(fd, cfg.opcode, cfg.flags, cfg.rsvd,
+			cfg.namespace_id, cfg.cdw2, cfg.cdw3, cfg.cdw10,
+			cfg.cdw11, cfg.cdw12, cfg.cdw13, cfg.cdw14,
+			cfg.cdw15, cfg.data_len, data, cfg.metadata_len,
+			mdata, cfg.timeout, &result);
+
+	gettimeofday(&end_time, NULL);
+	cmd_name = nvme_cmd_to_string(true, cfg.opcode);
+	if (cfg.latency)
+		printf("%s Command %s latency: %llu us\n",
+			//admin ? "Admin": "IO",
+			"Admin",
+			strcmp(cmd_name, "Unknown") ? cmd_name: "Vendor Specific",
+			elapsed_utime(start_time, end_time));
+
+	if (err < 0)
+		fprintf(stderr, "passthru: %s\n", nvme_strerror(errno));
+	else if (err)
+		nvme_show_status(err);
+	else  {
+		fprintf(stderr, "%s Command %s is Success and result: 0x%08x\n",
+				"Admin",
+				strcmp(cmd_name, "Unknown") ? cmd_name: "Vendor Specific",
+				result);
+		if (cfg.read && cfg.input_file) {
+			if (write(dfd, (void *)data, cfg.data_len) < 0)
+				perror("failed to write data buffer");
+			if (cfg.metadata_len && cfg.metadata)
+				if (write(mfd, (void *)mdata, cfg.metadata_len) < 0)
+					perror("failed to write metadata buffer");
+		} else if (!cfg.raw_binary) {
+			if (data && cfg.read && !err)
+				d((unsigned char *)data, cfg.data_len, 16, 1);
+		} else if (data && cfg.read)
+			d_raw((unsigned char *)data, cfg.data_len);
+	}
 		
 free_metadata:
 	free(mdata);

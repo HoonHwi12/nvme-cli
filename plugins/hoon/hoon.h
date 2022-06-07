@@ -14,6 +14,7 @@ PLUGIN(NAME("hoon", "hoon NVME plugin", NVME_VERSION),
 			ENTRY("flash-type",     "change flash nand type",   change_flash_type)
             ENTRY("print-zones",    "print zone information",   print_nand)
             ENTRY("config-control", "change config parameter",  h_config_control)
+            ENTRY("set-debug",      "set debug mode",           set_debug_mode)
     )
 );
 
