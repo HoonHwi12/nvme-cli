@@ -33,17 +33,17 @@
 	json_object_object_add(o, k, json_object_new_int(v))
 #define json_object_add_value_int(o, k, v) \
 	json_object_object_add(o, k, json_object_new_int(v))
-#ifdef CONFIG_JSONC_14
+//#ifdef CONFIG_JSONC_14
+//#define json_object_add_value_uint64(o, k, v) \
+//	json_object_object_add(o, k, json_object_new_uint64(v))
+//#else
 #define json_object_add_value_uint64(o, k, v) \
-	json_object_object_add(o, k, json_object_new_uint64(v))
-#else
-#define json_object_add_value_uint64(o, k, v) \
-	if ((v) > UINT_MAX) {		
+	if ((v) > UINT_MAX) {			\
 		fprintf(stderr, "Value overflow in %s", k);		\
 		json_object_object_add(o, k, json_object_new_int(-1));	\
 	} else								\
 		json_object_object_add(o, k, json_object_new_int(v))
-#endif
+//#endif
 #define json_object_add_value_float(o, k, v) \
 	json_object_object_add(o, k, json_object_new_double(v))
 #define json_object_add_value_string(o, k, v) \
