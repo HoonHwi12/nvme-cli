@@ -454,8 +454,8 @@ static int h_config_control(int argc, char **argv, struct command *cmd, struct p
 
 	OPT_ARGS(opts) = {
 		OPT_UINT("max_active",	'a', &cfg.cdw10,        "max number of active zone"),
-		OPT_UINT("max_open",	'o', &cfg.cdw11,        "max number of opened zone"),
-		OPT_UINT("femu_mode",	'm', &cfg.cdw12,        "define femu mode: OCSSD(0) BBSSD(1) NOSSD(2) ZNSSD(3) ZBBSSD(4)"),
+		OPT_UINT("max_open",	'o', &cfg.cdw11,        "max number of open zone"),
+		OPT_UINT("slc_size",	's', &cfg.cdw12,        "define number of slc block"),
 		OPT_END()
 	};
 
