@@ -544,9 +544,6 @@ ret:
 	return err;
 }
 
-
-
-
 //* by HH: set debug mode
 static int set_debug_mode(int argc, char **argv, struct command *cmd, struct plugin *plugin)
 {
@@ -589,9 +586,7 @@ static int set_debug_mode(int argc, char **argv, struct command *cmd, struct plu
 	};
 
 	OPT_ARGS(opts) = {
-		OPT_UINT("zone",	'z', &cfg.cdw10,        "set conventional zone"),
 		OPT_UINT("test",	't', &cfg.cdw11,        "set test print"),
-		OPT_UINT("version",	'v', &cfg.cdw12,        "check code version"),
 		OPT_END()
 	};
 
