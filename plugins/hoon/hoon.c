@@ -574,7 +574,7 @@ static int set_debug_mode(int argc, char **argv, struct command *cmd, struct plu
 		.cdw3			= 0,
 		.cdw10			= 0x899,
 		.cdw11			= 0x899,
-		.cdw12			= 0,
+		.cdw12			= 0x899,
 		.cdw13			= 0,
 		.cdw14			= 0,
 		.cdw15			= 0,
@@ -589,8 +589,9 @@ static int set_debug_mode(int argc, char **argv, struct command *cmd, struct plu
 	};
 
 	OPT_ARGS(opts) = {
-		OPT_UINT("debug",	'd', &cfg.cdw10,        "set debug print"),
+		OPT_UINT("zone",	'z', &cfg.cdw10,        "set conventional zone"),
 		OPT_UINT("test",	't', &cfg.cdw11,        "set test print"),
+		OPT_UINT("version",	'v', &cfg.cdw12,        "check code version"),
 		OPT_END()
 	};
 
